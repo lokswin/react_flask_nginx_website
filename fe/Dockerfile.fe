@@ -1,49 +1,29 @@
-# file: fe/Dockerfile.fe
+# Use a node base image
+FROM node:alpine as builder
 
-# Stage 1: Build stage
-FROM node:18.16.0-alpine3.18 AS builder
+# Set working directory
 WORKDIR /app
 
-# Copy package files to the container for npm install
+# Copy package.json and package-lock.json
+# Install dependencies
 COPY package.json ./
 COPY package-lock.json ./
 
-# RUN npm ci --only=production
+RUN npm install
 
-# Install webpack, webpack-cli, and babel-loader as development dependencies
-# Install npm packages based on the package.json file
-RUN npm install --verbose > npm-install.log 2>&1
-
-# Check for errors in the log file
-RUN if grep -q 'error' npm-install.log; then \
-    echo "npm install failed. Check npm-install.log for details." \
-    && cat npm-install.log \
-    && exit 1; \
-    else \
-    echo "npm install succeeded."; \
-    fi
-#RUN npm install --pure-lockfile
-
-
-
-# Copy the entire application to the /app directory in the container
+# Copy source files
 COPY . .
-# Build the application using npm run build
-RUN npm run build --verbose
-# Check if the build was successful by verifying the existence of index.html
-RUN ls -la /app/dist && test -e /app/dist/index.html
+
+# Build the React app
+RUN npm run build
+RUN ls -la .
+RUN ls -la build
+RUN ls -la public
 
 
-# Stage 2: Production stage
-FROM nginx:1.24.0-alpine
+# Stage 2 - Use Nginx to serve the build output
+FROM nginx:alpine
 
-# Copy built assets from the builder stage
-#COPY --chown=nginx:nginx --from=builder /app/build /usr/share/nginx/html
-
-# test
-# Copy the built assets from the builder stage (/app/build) to Nginx's HTML directory (/usr/share/nginx/html)
-WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
-COPY --from=builder /app/dist .
-COPY --from=builder /app/dist /usr/share/nginx/html
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the build output from the builder stage to the nginx server directory
+COPY --from=builder /app/public /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
