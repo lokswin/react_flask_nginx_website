@@ -1,5 +1,6 @@
-# file: be/Dockerfile.backend
-FROM python:3.8-slim
+# file: be/Dockerfile.be
+
+FROM python:3.12-alpine3.19
 
 WORKDIR /app
 

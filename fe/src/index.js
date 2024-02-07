@@ -1,6 +1,35 @@
-// file: src/index.js
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './app';
+// file: fe/src/index.js
 
-ReactDOM.render(<App />, document.getElementById('root'));
+// Importing the React library, which is necessary for writing React components.
+import React from 'react';
+
+// Importing the ReactDOM library, which is used for rendering React components into the DOM.
+import { createRoot } from 'react-dom/client';
+
+// Importing the 'App' component from the './app' file, assuming it's a relative path.
+import App from './App';
+
+// Rendering the 'App' component into the DOM. The component is enclosed in JSX syntax,
+// a syntax extension for JavaScript recommended by React.
+// The 'ReactDOM.render()' method takes two arguments:
+//   1. The React component to render (in this case, the 'App' component).
+//   2. The target DOM element where the component should be rendered.
+//ReactDOM.render(<App />, document.getElementById('root'));
+
+console.log('Index.js is being executed');
+
+const root = createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <h1>Index.js, works</h1>
+    <App />
+  </React.StrictMode>
+);
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
