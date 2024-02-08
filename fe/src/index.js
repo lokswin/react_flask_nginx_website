@@ -21,15 +21,7 @@ console.log('Index.js is being executed');
 const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <h1>Index.js, works</h1>
+    <h2>Index.js works!</h2>
     <App />
   </React.StrictMode>
 );
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-

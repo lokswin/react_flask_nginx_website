@@ -1,21 +1,13 @@
-// file: fe/src/app/App.js
-
 // Import necessary React and hooks from the 'react' library
 import React, { useEffect, useState } from "react";
-
-// Import the 'axios' library for making HTTP requests
 import axios from "axios";
-import * as Server from 'react-dom/server'
-
-console.log('App.js is being executed');
-
-let Greet = () => React.createElement('h1', null, 'Hello, world!');
-console.log(Server.renderToString(React.createElement(Greet)));
 
 // Define the main functional component named 'App'
 function App() {
   // Initialize state using the 'useState' hook to manage the fetched data
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Use the 'useEffect' hook to perform side effects in the component
   useEffect(() => {
@@ -23,13 +15,23 @@ function App() {
     const fetchData = async () => {
       try {
         // Make a GET request to the server using 'axios' and store the response
-        const response = await axios.get("/api/data"); // Use '/api' as the prefix
+        const response = await axios.get("/api/data");
 
-        // Update the state with the fetched data
-        setData(response.data);
+        // Check if the response data is not undefined or null
+        if (response.data != null) {
+          // Update the state with the fetched data
+          setData(response.data);
+        } else {
+          console.error("Unexpected data format received from server:", response.data);
+          throw new Error("Data received from server is not in expected format");
+        }
       } catch (error) {
-        // Handle errors by logging an error message to the console
+        // Handle errors by setting the error state
         console.error("Error fetching data:", error);
+        setError(error.message || "An error occurred while fetching data");
+      } finally {
+        // Set loading to false, whether the request was successful or not
+        setLoading(false);
       }
     };
 
@@ -39,27 +41,30 @@ function App() {
 
   // Return the JSX structure for rendering in the browser
   return (
-    React.createElement('div', null,
-      React.createElement('div', null,
-        React.createElement('p', null, 'This is another div inside the App component.')
-      ),
-      // Display a heading for the React application
-      React.createElement('h1', null, 'React Application'),
+    <div>
+      {/* Greeting message */}
+      <h2>App.js works! Welcome to the React Application!</h2>
 
-      // Use a conditional rendering to check if data is available
-      data.length > 0 ? (
+      {/* Use conditional rendering to check if data is available or if an error occurred */}
+      {loading ? (
+        // If still loading, render a loading message
+        <p>Loading...</p>
+      ) : error ? (
+        // If an error occurred, render an error message
+        <p>Error: {error}</p>
+      ) : data.length > 0 ? (
         // If data is available, render an unordered list with data items
-        React.createElement('ul', null,
-          data.map((item) => (
+        <ul>
+          {data.map((item) => (
             // Map over each data item and display it as a list item with a unique key
-            React.createElement('li', { key: item.id }, item.name)
-          ))
-        )
+            <li key={item.id}>{item.name}</li>
+          ))}
+        </ul>
       ) : (
-        // If no data is available, render a paragraph indicating no data
-        React.createElement('p', null, 'No data available')
-      )
-    )
+        // If no data is available, render a message indicating no data
+        <p>No data available</p>
+      )}
+    </div>
   );
 }
 
